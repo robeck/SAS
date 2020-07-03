@@ -48,3 +48,56 @@ Combine.sas： 该程序使用是在以上步骤都计算完成后。
 final_step:  该程序用于计算加权平均，算数平均。
 
 newey_west:  该程序用于进行T检验
+
+
+# 2. SAS程序中各函数细节说明
+
+
+
+
+macro split(ds,ds1);
+
+        proc sql noprint;
+        select distinct cusip_id into: names separated by ','/*所有类别放入宏names，逗号分隔*/
+        from &ds;
+        quit;
+        %let i=1;
+        %do %while(%scan(%quote(&names),&i,',') ne %str());/*子串不为空是循环拆分数据集*/
+                %let dname=%scan(%quote(&names),&i,',');
+				
+				
+				data D_&i;
+                set &ds1;
+                where cusip_id = "&dname";
+                run;
+				
+				proc sql noprint;
+				create table Ds_&i as
+				select * from D_&i as a left join A.name_info_new as b on a.cusip_id=b.cusip_id; /*name_info_new 其中的coupon为重新计算获得*/
+				quit;
+
+				/*原始数据已经按照要求排序*/
+				proc sort data=Ds_&i;
+				by trd_exctn_dt trd_exctn_tm;
+				run;
+
+				data Ds_&i;
+				set Ds_&i;
+				id=_N_;
+				run;
+
+				proc datasets lib=work  nolist;
+				delete D_&i / memtype=data;
+				quit;
+
+				%loop(&i);
+				
+	
+                %let i=%eval(&i.+1);
+				
+				 dm log 'clear;' continue; 
+		
+
+        %end;
+		
+%mend split;
