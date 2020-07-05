@@ -52,10 +52,12 @@ newey_west:  该程序用于进行T检验
 
 # 2. SAS程序中各函数细节说明
 
+1）test_join_name_2020test_v6程序说明
 
+/*split主程序用于将ds中包含的债券信息与ds1中数据匹配对应，生成完整的债券数据集，同时匹配name_info_new数据集，最终完成数据集DS_i
+  共29608个债券*/
+%macro split(ds,ds1);
 
-
-macro split(ds,ds1);
 
         proc sql noprint;
         select distinct cusip_id into: names separated by ','/*所有类别放入宏names，逗号分隔*/
@@ -99,5 +101,6 @@ macro split(ds,ds1);
 		
 
         %end;
-		
-%mend split;
+%mend split;	
+
+
