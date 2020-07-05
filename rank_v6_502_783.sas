@@ -6,7 +6,7 @@
 
 
 /*这里多个数据集合并的时候会造成内存崩溃，控制一次合并数据集的数量，保证运行顺利*/
-%do j=502 %to &M_week;
+%do j=501 %to &M_week;
 data rank_&j (keep=cusip_id rptd_pr entrd_vol_qt r_rf Q rovl rkt rsj rsk id p_n);
 set %do i=1 %to 5000;B.b_r_&i. %end;;
 where id=&j;
@@ -93,7 +93,7 @@ dm log 'clear;' continue;
 %macro split_rsj(k, h);
 
 
-%do l=502 %to &h;
+%do l=501 %to &h;
 
 proc sort data=rank_&l;
 by descending rsj;
@@ -129,7 +129,7 @@ dm log 'clear;' continue;
 %macro split_rsk(k, h);
 
 
-%do l=502 %to &h;
+%do l=501 %to &h;
 
 proc sort data=rank_&l;
 by descending rsk;
@@ -165,7 +165,7 @@ dm log 'clear;' continue;
 %macro split_rkt(k, h);
 
 
-%do l=502 %to &h;
+%do l=501 %to &h;
 
 proc sort data=rank_&l;
 by descending rkt;
@@ -200,7 +200,7 @@ dm log 'clear;' continue;
 %macro split_rovl(k, h);
 
 
-%do l=502 %to &h;
+%do l=501 %to &h;
 
 proc sort data=rank_&l;
 by descending rovl;
@@ -283,7 +283,7 @@ data C.w_1 C.w_2 C.w_3 C.w_4 C.w_5;
 run;
 
 
-%do i=502 %to &s;
+%do i=501 %to &s;
 %let data1=data_&i;
 %let name1=name_&i;
 
@@ -403,7 +403,7 @@ data D.w_1 D.w_2 D.w_3 D.w_4 D.w_5;
 run;
 
 
-%do i=502 %to &s;
+%do i=501 %to &s;
 %let data1=data_&i;
 %let name1=name_&i;
 
@@ -522,7 +522,7 @@ data E.w_1 E.w_2 E.w_3 E.w_4 E.w_5;
 run;
 
 
-%do i=502 %to &s;
+%do i=501 %to &s;
 %let data1=data_&i;
 %let name1=name_&i;
 
@@ -642,7 +642,7 @@ data F.w_1 F.w_2 F.w_3 F.w_4 F.w_5;
 run;
 
 
-%do i=502 %to &s;
+%do i=501 %to &s;
 %let data1=data_&i;
 %let name1=name_&i;
 
