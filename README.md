@@ -18,11 +18,13 @@ c. 排序计算进行了优化，避免了过多无用文件的使用。
 第一步：计算29608个债券的bond excess return以及rsj，rkt等参数。
 * 该步骤使用的程序有（return_calculate_V7_5factors_control_5999，return_calculate_V7_5factors_control_11998,...）共五个。
 
-* 首先将data.rar和data2.rar文件解压到同一文件夹中，并将该文件夹绑定为SAS程序中逻辑库A Example code：libname A 'F/:.....';run;
+* 首先将data.rar和data2.rar文件解压到同一文件夹中，并将该文件夹绑定为SAS程序中逻辑库A。
 
 * 在逻辑库中新建逻辑库B同时关联到空白文件夹。
 
-* 确认逻辑库A中必须包含有数据集 F_f, Name_info_new, Trace_enhanced_bond_cut, name_1, name_2, name_3, name_4, name_5。
+* （在逻辑库中新建逻辑库C同时关联到新空白文件夹。ps：该步骤只需要执行一次，即可在C逻辑库中存储29608个粗处理数据集，目的为便捷以后的运算。）
+
+* 确认逻辑库A中必须包含有数据集 F_f, Name_info_new, Trace_enhanced_bond_cut, def2，term，name_1, name_2, name_3, name_4, name_5。
 
 * 打开程序return_calculate_V7_5factors_control_5999, 直接运行即可。
 
