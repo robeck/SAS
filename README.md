@@ -6,9 +6,9 @@ V7：
 2. 请注意新版本中需要用到两个因子，分别在文件夹data2中，分别存于def2和term数据集中。
 
 具体改进：
-a.参数计算中加入了5因子。
-b.参数计算中加入了double-sorted参数。rsj->rsk和rsk->rsj。
-c.排序计算进行了优化，避免了过多无用文件的使用。
+a. 参数计算中加入了5因子。
+b. 参数计算中加入了double-sorted参数。rsj->rsk和rsk->rsj。
+c. 排序计算进行了优化，避免了过多无用文件的使用。
 
 
 # SAS code explanation and description
