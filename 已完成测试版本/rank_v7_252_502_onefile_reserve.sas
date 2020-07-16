@@ -122,7 +122,7 @@ run;
 
 
 /*这里确保分配的债券向上取整，例如数据集有21个债券，分四组，那么每组取6个债券，最后一组为剩下的*/
-%let n=%sysfunc(int(%sysevalf(&nobs/&k,floor)));
+%let n=%sysfunc(int(%sysevalf(&nobs/&k,ceil)));
 
 %put &nobs &n &l;
 dm log 'clear;' continue;
@@ -158,7 +158,7 @@ run;
 
 
 /*这里确保分配的债券向上取整，例如数据集有21个债券，分四组，那么每组取6个债券，最后一组为剩下的*/
-%let n=%sysfunc(int(%sysevalf(&nobs/&k,floor)));
+%let n=%sysfunc(int(%sysevalf(&nobs/&k,ceil)));
 
 %put &nobs &n &l;
 dm log 'clear;' continue;
@@ -194,7 +194,7 @@ run;
 
 
 /*这里确保分配的债券向上取整，例如数据集有21个债券，分四组，那么每组取6个债券，最后一组为剩下的*/
-%let n=%sysfunc(int(%sysevalf(&nobs/&k,floor)));
+%let n=%sysfunc(int(%sysevalf(&nobs/&k,ceil)));
 
 %put &nobs &n &l;
 dm log 'clear;' continue;
@@ -229,7 +229,7 @@ run;
 
 
 /*这里确保分配的债券向上取整，例如数据集有21个债券，分四组，那么每组取6个债券，最后一组为剩下的*/
-%let n=%sysfunc(int(%sysevalf(&nobs/&k,floor)));
+%let n=%sysfunc(int(%sysevalf(&nobs/&k,ceil)));
 
 %put &nobs &n &l;
 dm log 'clear;' continue;

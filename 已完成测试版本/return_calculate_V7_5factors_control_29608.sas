@@ -9,12 +9,12 @@
   最好方案：单独计算def，便于检查问题。
   计算中。（完成）
 
-  3.五因子计算与测试（未完成）
+  3.五因子计算与测试（完成）
 
   4.single-sorted portfolios with control  rsj-》rsk已经完成（完成）
   5.额外需要考虑何时使用rsk->rsj的残差估计
 
-ps：注意def因子在A.def2中，目前还需要进行计算才可以完全匹配上
+ps：注意def因子在A.def2中，目前还需要进行计算才可以完全匹配上 完成
 ps: 该版本用于非control的五因子依然适用
 
 
@@ -27,43 +27,49 @@ ps: 该版本用于非control的五因子依然适用
         from &ds;
         quit;
         %let i=1;
+        %let o=23997;
         %do %while(%scan(%quote(&names),&i,',') ne %str());/*子串不为空是循环拆分数据集*/
                 %let dname=%scan(%quote(&names),&i,',');
 				
 				
-				data D_&i;
+				data D_&o;
                 set &ds1;
                 where cusip_id = "&dname";
                 run;
-				
+
 				proc sql noprint;
-				create table Ds_&i as
-				select * from D_&i as a left join A.name_info_new as b on a.cusip_id=b.cusip_id; /*name_info_new 其中的coupon为重新计算获得*/
+				create table Ds_&o as
+				select * from D_&o as a left join A.name_info_new as b on a.cusip_id=b.cusip_id;
 				quit;
 
 				/*原始数据已经按照要求排序*/
-				proc sort data=Ds_&i;
+				proc sort data=Ds_&o;
 				by trd_exctn_dt trd_exctn_tm;
 				run;
 
-				data Ds_&i;
-				set Ds_&i;
+				data Ds_&o;
+				set Ds_&o;
 				id=_N_;
 				run;
 
+				data C.Ds_&o;
+				set Ds_&o;
+				run;
+
 				proc datasets lib=work  nolist;
-				delete D_&i / memtype=data;
+				delete D_&o / memtype=data;
 				quit;
 
-				%loop(&i);
+				%loop(&o);
 				
-	
+				%let o=%eval(&o.+1);
                 %let i=%eval(&i.+1);
 				
-				 dm log 'clear;' continue; 
-		
+				
+		 dm log 'clear;' continue; 
 
         %end;
+		
 		
 
 
@@ -948,4 +954,4 @@ quit;
 
 %mend merge;
 
-%split(A.name_test_v2,A.Trace_enhanced_clean_cut);
+%split(A.name_5,A.Trace_enhanced_clean_cut);

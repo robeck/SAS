@@ -51,6 +51,10 @@ ps: 该版本用于非control的五因子依然适用
 				id=_N_;
 				run;
 
+				data C.Ds_&i;
+				set DS_&i;
+				run;
+
 				proc datasets lib=work  nolist;
 				delete D_&i / memtype=data;
 				quit;
@@ -948,4 +952,4 @@ quit;
 
 %mend merge;
 
-%split(A.name_test_v2,A.Trace_enhanced_clean_cut);
+%split(A.name_1,A.Trace_enhanced_clean_cut);
