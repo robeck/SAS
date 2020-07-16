@@ -13,7 +13,7 @@ c. 排序计算进行了优化，避免了过多无用文件的使用。
 
 # SAS code explanation and description
 
-# 1. SAS程序运行说明：
+# 1）. SAS程序运行说明：
 
 第一步：计算29608个债券的bond excess return以及rsj，rkt等参数。
 * 该步骤使用的程序有（return_calculate_V7_5factors_control_5999，return_calculate_V7_5factors_control_11998,...）共五个。
@@ -47,22 +47,14 @@ ps：783周为多次测算结果，直接使用即可，如需验证我将提供
 
 
 
-2. 其他程序说明：
+# 2）. 其他程序说明：
 
-Combine.sas： 该程序使用是在以上步骤都计算完成后。
-
-* 新建SAS程序，将第二步中关联的3个不同文件夹的C逻辑库，在新程序中分别重新关联并命名为C，D，E逻辑库。
-
-* 同时新建F逻辑库关联新文件夹，用以保存完整的数据集。
-
-* 运行该程序，可在F逻辑库在获得按照不同参数排序，分组后的五个最终数据集。
-
-final_step:  该程序用于计算加权平均，算数平均。
+combine_final_step_v7： 该程序可一次性统计完全部rank文件中的数据集，运行方法为：当第二步全部运行完成后，在任意sas程序中打开combine_final_step_v7.sas，直接运行即可。最终结果将在rank文件夹中，分别为数据集rsj，rovl，rsk，rkt。
 
 newey_west:  该程序用于进行T检验
 
 
-# 2. SAS程序中各函数细节说明
+# 2）. SAS程序中各函数细节说明
 
 1）test_join_name_2020test_v6程序说明
 
