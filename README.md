@@ -7,7 +7,7 @@ V7：
 
 具体改进：
 a. 参数计算中加入了5因子。
-b. 参数计算中加入了double-sorted参数。rsj->rsk和rsk->rsj。
+b. 参数计算中加入了single-sorted with control参数。rsj->rsk和rsk->rsj。
 c. 排序计算进行了优化，避免了过多无用文件的使用。
 
 
