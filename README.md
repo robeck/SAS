@@ -1,11 +1,15 @@
 # SAS
 * SAS for bonds analysis
 
+请使用已‘完成测试版本’文件中的程序进行操作
+请注意新版本中需要用到两个因子，def和term，分别是数据集。。。。，
+
 # SAS code explanation and description
 
 # 1. SAS程序运行说明：
 
 第一步：计算29608个债券的bond excess return以及rsj，rkt等参数。
+* 该步骤使用的程序有（return_calculate_V7_5factors_control_5999，return_calculate_V7_5factors_control_11998,...）共五个。
 
 * 首先将data.rar和data2.rar文件解压到同一文件夹中，并将该文件夹绑定为SAS程序中逻辑库A Example code：libname A 'F/:.....';run;
 
@@ -13,7 +17,7 @@
 
 * 确认逻辑库A中必须包含有数据集 F_f, Name_info_new, Trace_enhanced_bond_cut, name_1, name_2, name_3, name_4, name_5。
 
-* 打开程序test_join_name_new_2020test_v6_5999, 直接运行即可。
+* 打开程序return_calculate_V7_5factors_control_5999, 直接运行即可。
 
 * 如果需要同时一次性计算全部数据，此时需要额外同时打开四个SAS程序，执行当前步骤中操作1->3。随后在四个程序中分别运行 ...._v6_11998, ....V6_17997, ....V6_23996,  ...._v6_29608。
 
