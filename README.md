@@ -1,5 +1,6 @@
 # SAS
 * SAS for bonds analysis
+
 V8：
 1.代码进一步精简，并且全部备注好说明，请使用V8文件夹中的程序。
 
@@ -62,9 +63,11 @@ newey_west:  该程序用于进行T检验
 /***********************************
 
 split(ds,ds1)
+
 用于拆分，匹配总共29608个债券的全部数据
 
 &nemas:包含单一债券名称的宏数据
+
 ds_&i:拆分出来包含必要信息的债券数据集，用于之后的计算
 
 ************************************/
@@ -128,7 +131,9 @@ ds_&i:拆分出来包含必要信息的债券数据集，用于之后的计算
 对每个拆分出来的债券数据进行计算，包括bond_return和其他排序参数
 
  %bond_return(Ds_&i,&i): This function is used to calculate bond_return
+ 
  %calculate(&i): This function is used to calculate rsj, rsk, rkt, rovl and others
+ 
  %merge(&i): this function merges all datasets within one single bond which contains different paramaters  
 
 ***************************/
@@ -144,14 +149,20 @@ ds_&i:拆分出来包含必要信息的债券数据集，用于之后的计算
 
 
 
+
 /**********
 
 对每一个债券数据集ds进行计算，其输出数据集包含bond excess return和 Q（5 factors ff regression）
+
 ds: its a dataset which will be calculated.
+
 i: it represents bond i.
 
+
 bond_return()函数实现了
+
 1.对短期缺失数据的均值补充，以及长期缺失数据的前值覆盖。
+
 2.根据数据补充的结果，再进行对bond excess return值和回归因子Q的计算。
 
 ***********/
