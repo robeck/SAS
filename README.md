@@ -654,8 +654,11 @@ bond_return()函数实现了
 	%mend bond_return;
 	
 
+
+
 /********************
 reg（）函数实现了
+
 1.对数据集ds做线性回归，截距Intercept保留，即为我们需要的Q值
 
 ds:用于计算回归的数据集
@@ -679,12 +682,18 @@ ds:用于计算回归的数据集
 	run;
 
 	%mend reg;
+	
+
+
 
 /****************
+
 interests（）函数实现了
+
 1.根据数据集ds的不同交割频率，我们计算对应的应计利息AIT
 
 ds:用于计算利息的数据集
+
 j:第j个债券
 ******************/
 
@@ -743,5 +752,325 @@ j:第j个债券
 
 	%mend  interests;
 
+
+
+
+
+/***************************
+
+calculate（）函数实现了
+
+1.对缺失数据的前值覆盖，即缺失周或者天的债券价格按照前值进行填补，例如初始价格$90,接下来有10天无交易，其价格将按照前值即初始价格$90来补充。
+
+2.根据每天交易价格的波动数据来计算各个参数包括，rsj, rkt, rsk, rovl以及residual。
+
+n:第n个债券
+
+**************************/
+
+	%macro calculate(n);
+
+	/****
+
+	step1
+
+
+	****/
+	/*此处代码块用于计算每一天的平均价格price 和总成交量quantity，便于后面实现数据填补*/
+	proc sql;
+	create table Ds_1_&n as
+	select *, sum(entrd_vol_qt) as total_quan, sum(total) as day_total
+	from Ds_&n
+	group by trd_exctn_dt;
+	quit;
+
+	data Ds_2_&n;
+	set Ds_1_&n;
+	pri=round((day_total/total_quan),0.001);
+
+	data Ds_2_&n;
+	set Ds_2_&n(drop=rptd_pr entrd_vol_qt day_total total rename=(total_quan=entrd_vol_qt) rename=(pri=rptd_pr));
+	label rptd_pr='Price';
+	label entrd_vol_qt='quantity';
+	run;
+
+	proc sql;
+	create table Ds_3_&n as
+	select  * from Ds_2_&n
+	where id in (select max(id) from Ds_2_&n group by trd_exctn_dt);
+	quit;
+
+
+	/****
+
+	step2：数据填补
+
+
+	****/
+	/*其方法为：当出现某日无债券交易的情况，我们并不直接将无交易的日期中债券价格设置为0，而是将该日债券价格设置为前值价格，目的为保证无交易=无价格波动*/
+	data Ds_4_&n(rename=(_date=trd_exctn_dt) rename=(_price=rptd_pr) rename=(_quantity=entrd_vol_qt));
+	   set Ds_3_&n(drop=id);
+		by cusip_id;
+	   retain  _date count_day _price _quantity;
+	   format _date YYMMDDN8.;
+	   if first.cusip_id then do;
+	      count_day=1;
+		  _date=trd_exctn_dt;
+			  _price=rptd_pr;
+			  _quantity=entrd_vol_qt;
+		  output;
+	    end;
+	     else do;
+
+
+		       _date=intnx('day',_date,1);
+			  if _date<trd_exctn_dt then do until (_date=trd_exctn_dt);
+		      count_day=count_day;
+				     _price=_price;
+					 _quantity=entrd_vol_qt;
+		       output;
+		      _date=intnx('day',_date,1);
+			       end;
+			 if _date=trd_exctn_dt then do;
+					count_day+1;
+									_price=rptd_pr;
+									_quantity=entrd_vol_qt;
+					output;
+				     end;
+	     end;
+	drop trd_exctn_dt;
+	drop rptd_pr;
+	drop entrd_vol_qt;
+	run;
+
+	/*以每周三为起始，一周共保留五天交易日*/
+	data Ds_4_&n;
+	set Ds_4_&n;
+	wd=WEEKDAY(trd_exctn_dt);
+	if _n_=1 then do;
+	if wd>3 then call symput('e',7-(wd-3));
+	if wd<3 then call symput('e',3-wd);
+	if wd=3 then call symput('e',0);
+	end;
+	run;
+
+	/*不计算周末，删除周末*/
+	data Ds_4_&n;
+	set Ds_4_&n;
+	%put &e;
+	if _N_<=&e then delete;
+	if wd=6 or wd=7 then delete;
+	run;
+
+
+	/****
+
+	step3：参数计算
+
+
+	****/
+	/*
+	计算每日每笔交易差值
+
+	1.dif1代表的每日交易差，即rt
+	2.dif2=rt的平方
+	3.dif3=rt的立方
+	*/
+	data ds_5_&n;
+	set Ds_4_&n;
+	dif1=dif(rptd_pr);
+	if wd=3 then dif1=0;
+	dif2=dif1**2;
+	dif3=dif1**3;
+	dif4=dif1**4;
+	num=_n_-1;
+	w=int(num/5)+1;
+	drop num;
+	run;
+
+
+	/*每五天为一周，计算周化的rt的和，平方和，三次方和以及四次方和*/
+	data ds_6_&n(drop=dif1 dif2 dif3 dif4);
+	set ds_5_&n;
+	t=mod(_n_,5);
+		if t=0 then t=5;
+
+		retain dif1_5 dif2_5 dif3_5 dif4_5;
+			if t=1 then do;
+			dif1_5=dif1;
+			dif2_5=dif2;
+			dif3_5=dif3;
+			dif4_5=dif4;
+		end;
+		else do;
+			dif1_5=dif1_5+dif1;
+			dif2_5=dif2_5+dif2;
+			dif3_5=dif3_5+dif3;
+			dif4_5=dif4_5+dif4;
+		end;
+		if t=5 then output;
+		run;
+
+	/*这里选取rt>0和rt<0的不同部分，区分交易波动的符号特性是为了计算rsj参数*/
+	data ds_7p_&n ds_7n_&n;
+	set ds_5_&n;
+	if dif1>=0 then output ds_7p_&n;
+	if dif1<0 then output ds_7n_&n;
+	run;
+
+	/*
+	  rt>0部分的平方和pos
+	  rt<0部分的平方和neg
+	*/
+	proc sql;
+	create table ds_7p_1_&n as
+	select cusip_id,trd_exctn_dt,sum(dif2) as rvt_pos,w
+	from ds_7p_&n
+	group by w
+	order by trd_exctn_dt;
+
+	create table ds_7n_1_&n as
+	select cusip_id,trd_exctn_dt,sum(dif2) as rvt_neg,w
+	from ds_7n_&n
+	group by w
+	order by trd_exctn_dt;
+
+	quit;
+
+	data ds_7p_1_&n;
+	set ds_7p_1_&n;
+	by w;
+	if last.w then output;
+	run;
+
+	data ds_7n_1_&n;
+	set ds_7n_1_&n;
+	by w;
+	if last.w then output;
+	run;
+
+	data ds_8_&n;
+		merge ds_7p_1_&n(drop=trd_exctn_dt)
+		      ds_7n_1_&n(drop=trd_exctn_dt);
+		by w;
+
+		if rvt_pos='.' then rvt_pos=0;
+		if rvt_neg='.' then rvt_neg=0;
+		run;
+
+	/*计算参数rsj,rsk,rkt,rovl*/
+	data ds_9_&n(keep=cusip_id rsj rsk rkt rovl id);
+		merge ds_6_&n(keep=w dif1_5 dif2_5 dif3_5 dif4_5)
+			  ds_8_&n;
+		by w;
+
+		if dif1_5='.' then delete;
+		sj_t= rvt_pos-rvt_neg;
+		rsj=sj_t/dif2_5;
+		rsk=((sqrt(5))*dif3_5)/(sqrt(sqrt(dif2_5)**3));
+		rkt=(5*dif4_5)/dif2_5**2;
+		rovl=sqrt(dif2_5);
+		id=_n_;
+	run;
+
+	/*
+	rsj->rsk 的残差，保存在tt_&n中，标记为resid_rsj_rsk
+	rsk->rsj 的残差，保存在t_&n中，标记为resid_rsk_rsj
+	*/
+	proc reg data=ds_9_&n noprint;
+	model rsj=rsk;
+	output out=tt_&n stdr=stdr r=resid_rsj_rsk STUDENT=stud;
+	  run;
+	quit;
+
+	proc reg data=ds_9_&n noprint;
+	model rsk=rsj;
+	output out=t_&n stdr=stdr r=resid_rsk_rsj STUDENT=stud;
+	  run;
+	quit;
+
+	data tt_&n;
+	set tt_&n;
+	keep id resid_rsj_rsk;
+	run;
+
+	data t_&n;
+	set t_&n;
+	keep id resid_rsk_rsj;
+	run;
+
+	data ds_9_&n;
+	merge ds_9_&n tt_&n t_&n;
+	by id;
+	run;
+
+
+
+	/*若有空值参数设置为0*/
+	%nullo(ds_9_&n);
+
+
+
+	proc datasets lib=work  nolist;
+	save br_8_&n ds_9_&n / memtype=data;
+	quit;
+
+
+	%mend calculate;
+
+
+/**************************
+
+nullo()函数实现了
+
+1.确保ds数据集中无空值，所有空值由0替代，便于后期排序操作
+
+**************************/
+
+	%macro nullo(ds);
+
+		data &ds;
+		set &ds;
+		array numtmp _numeric_;
+		do over numtmp;
+		numtmp=coalesce(numtmp,0);
+		end;
+		run;
+
+
+	%mend nullo;
+
+
+
+
+/**************************
+
+merge()函数实现了
+
+1.组合数据集br_8_i和ds_9_i,即把周化的包含bond excess return数据集和包含排序参数的数据集组合在一起，便于我们在后期排序中，根据参数大小的不同来统计return和Q值
+
+m:第m个债券
+
+**************************/
+
+	%macro merge(m);
+
+	proc sql;
+	create table b_r_&m as
+	select * from br_8_&m as a left join ds_9_&m as b on a.id=b.id;
+	quit;
+
+	/*存入新逻辑库B*/
+	data B.b_r_&m;
+	set b_r_&m;
+	p_n=rptd_pr*entrd_vol_qt;
+	if dat=' ' then delete;
+	run;
+
+	proc datasets lib=work  nolist;
+	delete br_8_&m b_r_&m ds_9_&m / memtype=data;
+	quit;
+
+	%mend merge;
 
 
