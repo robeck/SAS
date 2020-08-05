@@ -54,9 +54,9 @@ c. 排序计算进行了优化，避免了过多无用文件的使用。
 
 * 4.新建逻辑库E->关联到新文件夹，ps：此处文件夹可命名为: cross_Rank。此处存放cross_section_regression的数据。
 
-* 3.打开程序rank_v10_252_double_single_crossesction.sas，直接运行即可。
+* 5.打开程序rank_v10_252_double_single_crossesction.sas，直接运行即可。
 
-* 4.同时再打开两个sas程序，执行1->2,请确保逻辑库B,C,D,E关联的文件必须一致。随后分别运行rank_v10_502_double_single_crossesction.sas和rank_v10_783_double_single_crossesction.sas
+* 6.同时再打开两个sas程序，执行1->2,请确保逻辑库B,C,D,E关联的文件必须一致。随后分别运行rank_v10_502_double_single_crossesction.sas和rank_v10_783_double_single_crossesction.sas
 
 ps：所有关联路径最好不要出现中文。
 ps: 请备份好C，D，E逻辑库关联的文件，以防后期处理中导致数据集改变。
