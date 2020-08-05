@@ -1,6 +1,14 @@
 # SAS
 * SAS for bonds analysis
 
+v9_modify：
+
+1.此代码版本为全部运行版本，即single_sorted,single_sorted_controlling,double_sorted,cross_section_regression等全部功能一次运行实现。
+
+2.代码请使用v9_modify文件夹中的程序，必要数据集使用data2文件夹。
+
+3.代码的复杂性，和运行的复杂性是由于时间因素所导致的，分块运行代码能大大提升代码运行效率。鉴于sas无法实现真正的多线程操作，多代码块，多逻辑库关联是不得不做的
+
 V8：
 
 1.代码进一步精简，并且全部备注好说明，请使用V8文件夹中的程序。
@@ -20,43 +28,53 @@ c. 排序计算进行了优化，避免了过多无用文件的使用。
 
 # 1）. SAS程序运行说明：
 
-第一步：计算29608个债券的bond excess return以及rsj，rkt等参数。
-* 该步骤使用的程序有（return_calculate_V7_5factors_control_5999，return_calculate_V7_5factors_control_11998,...）共五个。
+第一步：计算29608个债券的bond excess return以及rsj，rkt，rkt,rovl,rsj_rsk_resdial,rsk_rsj_resdiual等参数。
+* 该步骤使用的程序有（return_calculate_V9_5factors_control_5999，return_calculate_V9_5factors_control_11998,...）共五个。
 
 * 1.首先将data.rar和data2.rar文件解压到同一文件夹中，并将该文件夹绑定为SAS程序中逻辑库A。
 
-* 2.在逻辑库中新建逻辑库B同时关联到空白文件夹（V7_29608） ps：用于储存全部计算结果此处文件夹命名为V7_29608。
+* 2.确认逻辑库A中必须包含有数据集 F_f, Name_info_new, Trace_enhanced_bond_cut, def2，term，name_1, name_2, name_3, name_4, name_5。
 
-* 3.（在逻辑库中新建逻辑库C同时关联到新空白文件夹（ds_29608)。ps：该步骤只需要执行一次，即可在C逻辑库中存储29608个粗处理数据集，目的为便捷以后的运算,此处文件夹命名为ds_29608。）
+* 3.在逻辑库中新建逻辑库B同时关联到空白文件夹（例如空白文件夹命名：V9_29608） ps：用于储存全部计算结果此处文件夹命名为V9_29608。
 
-* 4.确认逻辑库A中必须包含有数据集 F_f, Name_info_new, Trace_enhanced_bond_cut, def2，term，name_1, name_2, name_3, name_4, name_5。
 
-* 5.打开程序return_calculate_V7_5factors_control_5999.sas, 直接运行即可。
+* 4.打开程序return_calculate_V9_5factors_control_5999.sas, 直接运行即可。
 
-* 6.如果需要同时一次性计算全部数据，此时需要额外同时打开四个SAS程序，执行当前步骤中操作1->4, (此处许明确，每一个新sas程序中新建的逻辑库必须全部一致，且关联到文件夹V7_29608和ds_29608。)随后在四个程序中分别运行 ...._v7_11998, ....V7_17997, ....V7_23996,  ...._v7_29608。
+* 5.如果需要同时一次性计算全部数据，此时需要额外同时打开四个SAS程序，执行当前步骤中操作1->3, (此处许明确，每一个新sas程序中新建的逻辑库必须全部一致，且关联到文件夹V9_29608。)随后在四个程序中分别运行 ...._v9_11998, ....V9_17997, ....V9_23996,  ...._v9_29608。
 
 
 第二步：对29608个债券，共计783周的数据进行排序计算。
-* 该步骤使用的程序有(rank_v7_2_252_onefile_reserve.sas, rank_v7_252_502_onefile_reserve.sas, rank_v7_502_783_onefile_reserve.sas)共三个。
+* 该步骤使用的程序有(rank_v10_252_double_single_crossesction.sas, rank_v10_502_double_single_crossesction.sas, rank_v10_783_double_single_crossesction.sas)共三个。
 
-* 1.首先我们需要重新打开一个SAS程序，新建逻辑库B->关联到与第一步相同的文件夹V7_29608。
+* 1.首先我们需要重新打开一个SAS程序，新建逻辑库B->关联到与第一步相同的文件夹:V9_29608。
 
-* 2.新建逻辑库C->关联到新文件夹，ps：此处文件夹可命名为Rank。
+* 2.新建逻辑库C->关联到新文件夹，ps：此处文件夹可命名为: double_Rank。此处存放double_sorted的数据。
 
-* 3.打开程序rank_v7_2_252_onefile_reserve.sas，直接运行即可。
+* 3.新建逻辑库D->关联到新文件夹，ps：此处文件夹可命名为: single_Rank。此处存放single_sorted和single_sorted_controlling的数据。
 
-* 4.同时再打开两个sas程序，执行1->2,请确保逻辑库B，C关联的文件必须一致，为V7_29608和Rank。随后分别运行rank_v7_252_502_onefile_reserve.sas和rank_v7_502_783_onefile_reserve.sas
+* 4.新建逻辑库E->关联到新文件夹，ps：此处文件夹可命名为: cross_Rank。此处存放cross_section_regression的数据。
+
+* 3.打开程序rank_v10_252_double_single_crossesction.sas，直接运行即可。
+
+* 4.同时再打开两个sas程序，执行1->2,请确保逻辑库B,C,D,E关联的文件必须一致。随后分别运行rank_v10_502_double_single_crossesction.sas和rank_v10_783_double_single_crossesction.sas
 
 ps：所有关联路径最好不要出现中文。
+ps: 请备份好C，D，E逻辑库关联的文件，以防后期处理中导致数据集改变。
 ps：783周为多次测算结果，直接使用即可，如需验证我将提供额外测试代码。
+
 
 
 
 # 2）. 其他程序说明：
 
-combine_final_step_v7： 该程序可一次性统计完全部rank文件中的数据集，运行方法为：当第二步全部运行完成后，在任意sas程序中打开combine_final_step_v7.sas，直接运行即可。最终结果将在rank文件夹中，分别为数据集rsj，rovl，rsk，rkt。
+combine_final_All：
 
-newey_west:  该程序用于进行T检验
+* 1.当前版本的combine_final_all一次性可以处理全部数据集，因此我们直接在全部rank运行完后，随机在一个程序中打开代码 combine_final_All.sas
+
+* 2.直接运行combine_final_All,在C，D，E逻辑库中均会出现最终的数据集结果。
+
+
+ps:关于t检验和其他说明，后续将补充
 
 
 # 2）. SAS程序中各函数细节说明
